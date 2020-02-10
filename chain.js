@@ -19,7 +19,6 @@ if (process.env.NEW_RELIC_LICENSE_KEY) {
 	require('./utils/newrelic_lisk');
 }
 
-const genesisBlock = require('./genesis_block.json');
 const { convertErrorsToString } = require('./utils/error_handlers');
 const { Sequence } = require('./utils/sequence');
 const { createStorageComponent } = require('lisk-framework/src/components/storage');
@@ -69,7 +68,9 @@ module.exports = class Chain {
 	}
 
 	async bootstrap() {
-		this.options.genesisBlock = genesisBlock;
+		this.options.genesisBlock = require(
+			`./genesis/${this.options.networkName}/genesis_block.json`
+		);
 
 		const loggerConfig = await this.channel.invoke(
 			'app:getComponentConfig',
