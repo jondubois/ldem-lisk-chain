@@ -35,6 +35,10 @@ module.exports = class LDEMLiskModule extends BaseModule {
 		this.chain = null;
 	}
 
+	static get dependencies() {
+		return ['network'];
+	}
+
 	static get alias() {
 		return MODULE_ALIAS;
 	}
