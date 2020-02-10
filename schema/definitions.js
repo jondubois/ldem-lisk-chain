@@ -16,7 +16,7 @@
 
 module.exports = {
 	Signature: {
-		id: 'CapitaliskSignature',
+		id: 'Signature',
 		type: 'object',
 		required: ['transactionId', 'publicKey', 'signature'],
 		properties: {
@@ -48,7 +48,7 @@ module.exports = {
 		},
 	},
 	CommonBlock: {
-		id: 'CapitaliskCommonBlock',
+		id: 'CommonBlock',
 		type: 'object',
 		required: ['id', 'height', 'previousBlock'],
 		properties: {
@@ -72,7 +72,7 @@ module.exports = {
 		},
 	},
 	WSSignaturesList: {
-		id: 'CapitaliskWSSignaturesList',
+		id: 'WSSignaturesList',
 		type: 'object',
 		required: ['signatures'],
 		properties: {
@@ -93,14 +93,14 @@ module.exports = {
 		},
 	},
 	WSBlocksList: {
-		id: 'CapitaliskWSBlocksList',
+		id: 'WSBlocksList',
 		type: 'array',
 		items: {
 			type: 'object',
 		},
 	},
 	WSBlocksCommonRequest: {
-		id: 'CapitaliskWSBlocksCommonRequest',
+		id: 'WSBlocksCommonRequest',
 		type: 'object',
 		required: ['ids'],
 		properties: {
@@ -111,7 +111,7 @@ module.exports = {
 		},
 	},
 	WSTransactionsRequest: {
-		id: 'CapitaliskWSTransactionsRequest',
+		id: 'WSTransactionsRequest',
 		type: 'object',
 		required: ['transactions'],
 		properties: {
@@ -132,7 +132,7 @@ module.exports = {
 		},
 	},
 	WSTransactionsResponse: {
-		id: 'CapitaliskWSTransactionsResponse',
+		id: 'WSTransactionsResponse',
 		type: 'object',
 		required: ['transactions'],
 		properties: {
@@ -147,7 +147,7 @@ module.exports = {
 		},
 	},
 	WSSignaturesResponse: {
-		id: 'CapitaliskWSSignaturesResponse',
+		id: 'WSSignaturesResponse',
 		required: ['signatures'],
 		properties: {
 			signatures: {
@@ -161,7 +161,7 @@ module.exports = {
 		},
 	},
 	WSBlocksBroadcast: {
-		id: 'CapitaliskWSBlocksBroadcast',
+		id: 'WSBlocksBroadcast',
 		type: 'object',
 		required: ['block'],
 		properties: {

@@ -243,7 +243,7 @@ const defaultConfig = {
 		'exceptions',
 	],
 	default: {
-		database: 'capitalisk_main',
+		database: 'lisk_main',
 		broadcasts: {
 			active: true,
 			broadcastInterval: 5000,

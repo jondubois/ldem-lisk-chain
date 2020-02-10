@@ -1,2 +1,2 @@
-# capitalisk
-Capitalisk sidechain as a Lisk interchain module
+# ldem-lisk-chain
+Lisk chain module for LDEM.

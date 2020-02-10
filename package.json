@@ -1,18 +1,18 @@
 {
-  "name": "capitalisk",
-  "version": "2.0.1",
-  "description": "Capitalisk sidechain",
+  "name": "ldem-lisk-chain",
+  "version": "0.9.0",
+  "description": "LDEM Lisk chain module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "capitalisk",
+    "ldem",
     "lisk",
-    "sidechain"
+    "chain"
   ],
   "author": "Jonathan Gros-Dubois",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "dependencies": {
     "@liskhq/lisk-cryptography": "*",
     "@liskhq/lisk-transactions": "*",
@@ -23,10 +23,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jondubois/capitalisk.git"
+    "url": "git+https://github.com/jondubois/ldem_lisk_chain.git"
   },
   "bugs": {
-    "url": "https://github.com/jondubois/capitalisk/issues"
+    "url": "https://github.com/jondubois/ldem_lisk_chain/issues"
   },
-  "homepage": "https://github.com/jondubois/capitalisk#readme"
+  "homepage": "https://github.com/jondubois/ldem_lisk_chain#readme"
 }

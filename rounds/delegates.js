@@ -222,7 +222,7 @@ class Delegates {
 		} catch (err) {
 			this.logger.warn(err, 'Failed to insert fork info');
 		}
-		this.channel.publish('capitalisk:delegates:fork', fork);
+		this.channel.publish('ldem_lisk_chain:delegates:fork', fork);
 	}
 
 	/**

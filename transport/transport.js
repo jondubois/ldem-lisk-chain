@@ -108,13 +108,13 @@ class Transport {
 			this.broadcaster.enqueue(
 				{},
 				{
-					api: 'capitalisk:postSignatures',
+					api: 'ldem_lisk_chain:postSignatures',
 					data: {
 						signature,
 					},
 				},
 			);
-			this.channel.publish('capitalisk:signature:change', signature);
+			this.channel.publish('ldem_lisk_chain:signature:change', signature);
 		}
 	}
 
@@ -135,13 +135,13 @@ class Transport {
 			this.broadcaster.enqueue(
 				{},
 				{
-					api: 'capitalisk:postTransactions',
+					api: 'ldem_lisk_chain:postTransactions',
 					data: {
 						transaction: transactionJSON,
 					},
 				},
 			);
-			this.channel.publish('capitalisk:transactions:change', transactionJSON);
+			this.channel.publish('ldem_lisk_chain:transactions:change', transactionJSON);
 		}
 	}
 
@@ -194,7 +194,7 @@ class Transport {
 			{
 				broadhash,
 			},
-			{ api: 'capitalisk:postBlock', data: { block } },
+			{ api: 'ldem_lisk_chain:postBlock', data: { block } },
 		);
 	}
 
