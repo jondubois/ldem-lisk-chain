@@ -36,7 +36,7 @@ module.exports = class LDEMLiskModule extends BaseModule {
 	}
 
 	static get dependencies() {
-		return ['network'];
+		return ['app', 'network'];
 	}
 
 	static get alias() {
