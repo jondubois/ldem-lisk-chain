@@ -1,6 +1,6 @@
 {
   "name": "ldem-lisk-chain",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "LDEM Lisk chain module",
   "main": "index.js",
   "scripts": {
