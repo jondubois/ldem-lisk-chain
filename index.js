@@ -17,6 +17,18 @@
 const { config: DefaultConfig } = require('./defaults');
 const Chain = require('./chain');
 const { migrations } = require('./migrations');
+const {
+	TransferTransaction,
+	SecondSignatureTransaction,
+	DelegateTransaction,
+	VoteTransaction,
+	MultisignatureTransaction
+} = require('@liskhq/lisk-transactions');
+const {
+	DappTransaction,
+	InTransferTransaction,
+	OutTransferTransaction
+} = require('./extra_transactions');
 const BaseModule = require('lisk-framework/src/modules/base_module');
 const MODULE_ALIAS = 'ldem_lisk_chain';
 
@@ -145,6 +157,16 @@ module.exports = class LDEMLiskModule extends BaseModule {
 	}
 
 	async load(channel) {
+		this.options.registeredTransactions = {
+			'0': Object.freeze(TransferTransaction),
+			'1': Object.freeze(SecondSignatureTransaction),
+			'2': Object.freeze(DelegateTransaction),
+			'3': Object.freeze(VoteTransaction),
+			'4': Object.freeze(MultisignatureTransaction),
+			'5': Object.freeze(DappTransaction),
+			'6': Object.freeze(InTransferTransaction),
+			'7': Object.freeze(OutTransferTransaction)
+		};
 		this.chain = new Chain(channel, this.options, {
 			[MODULE_ALIAS]: migrations
 		});

@@ -1,6 +1,6 @@
 {
   "name": "ldem-lisk-chain",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "LDEM Lisk chain module",
   "main": "index.js",
   "scripts": {
@@ -14,10 +14,10 @@
   "author": "Jonathan Gros-Dubois",
   "license": "MIT",
   "dependencies": {
-    "@liskhq/lisk-cryptography": "*",
-    "@liskhq/lisk-transactions": "*",
-    "@liskhq/lisk-validator": "*",
-    "@liskhq/bignum": "*",
+    "@liskhq/bignum": "^1.3.1",
+    "@liskhq/lisk-cryptography": "^2.1.1",
+    "@liskhq/lisk-transactions": "^2.1.1",
+    "@liskhq/lisk-validator": "^0.2.1",
     "lisk-framework": "^0.4.1"
   },
   "devDependencies": {},
