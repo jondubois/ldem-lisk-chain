@@ -47,12 +47,12 @@ class Broadcaster {
 		// Broadcast routes
 		this.routes = [
 			{
-				path: 'ldem_lisk_chain:postTransactions',
+				path: 'postTransactions',
 				collection: 'transactions',
 				object: 'transaction',
 			},
 			{
-				path: 'ldem_lisk_chain:postSignatures',
+				path: 'postSignatures',
 				collection: 'signatures',
 				object: 'signature',
 			},

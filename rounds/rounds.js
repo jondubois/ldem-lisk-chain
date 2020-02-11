@@ -213,7 +213,7 @@ class Rounds {
 				.then(() => {
 					if (scope.finishRound) {
 						return promised.land().then(() => {
-							library.channel.publish('ldem_lisk_chain:rounds:change', { number: round });
+							library.channel.publish('chain:rounds:change', { number: round });
 						});
 					}
 					return true;

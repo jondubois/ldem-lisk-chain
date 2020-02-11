@@ -149,7 +149,7 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			[MODULE_ALIAS]: migrations
 		});
 		await this.chain.bootstrap();
-		channel.publish('ldem_lisk_chain:bootstrap');
+		channel.publish('chain:bootstrap');
 	}
 
 	async unload() {

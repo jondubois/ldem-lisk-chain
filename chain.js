@@ -154,7 +154,11 @@ module.exports = class Chain {
 			await bootstrapCache(this.scope);
 
 			await this.storage.entities.Migration.defineSchema();
-			await this.storage.entities.Migration.applyAll(this.migrations);
+			try {
+				await this.storage.entities.Migration.applyAll(this.migrations);
+			} catch (error) {
+				this.logger.warn('Could not apply some migrations');
+			}
 
 			await this._initModules();
 
@@ -181,15 +185,21 @@ module.exports = class Chain {
 					'network:event',
 					async ({ data: { event, data } }) => {
 						try {
-							if (event === 'ldem_lisk_chain:postTransactions') {
+							if (
+								event === 'postTransactions'
+							) {
 								await this.transport.postTransactions(data);
 								return;
 							}
-							if (event === 'ldem_lisk_chain:postSignatures') {
+							if (
+								event === 'postSignatures'
+							) {
 								await this.transport.postSignatures(data);
 								return;
 							}
-							if (event === 'ldem_lisk_chain:postBlock') {
+							if (
+								event === 'postBlock'
+							) {
 								await this.transport.postBlock(data);
 								return;
 							}
@@ -506,7 +516,7 @@ module.exports = class Chain {
 				const transactions = block.transactions.reverse();
 				this.transactionPool.onDeletedTransactions(transactions);
 				this.channel.publish(
-					'ldem_lisk_chain:transactions:confirmed:change',
+					'chain:transactions:confirmed:change',
 					block.transactions,
 				);
 			}
@@ -514,14 +524,14 @@ module.exports = class Chain {
 				{ id: block.id, height: block.height },
 				'Deleted a block from the lisk chain',
 			);
-			this.channel.publish('ldem_lisk_chain:blocks:change', block);
+			this.channel.publish('chain:blocks:change', block);
 		});
 
 		this.blocks.on(EVENT_NEW_BLOCK, ({ block }) => {
 			if (block.transactions.length) {
 				this.transactionPool.onConfirmedTransactions(block.transactions);
 				this.channel.publish(
-					'ldem_lisk_chain:transactions:confirmed:change',
+					'chain:transactions:confirmed:change',
 					block.transactions,
 				);
 			}
@@ -533,7 +543,7 @@ module.exports = class Chain {
 				},
 				'New block added to the lisk chain',
 			);
-			this.channel.publish('ldem_lisk_chain:blocks:change', block);
+			this.channel.publish('chain:blocks:change', block);
 		});
 
 		this.transactionPool.on(EVENT_UNCONFIRMED_TRANSACTION, transaction => {
@@ -549,9 +559,7 @@ module.exports = class Chain {
 		});
 
 		this.blocks.on(EVENT_NEW_BROADHASH, ({ broadhash, height }) => {
-			this.channel.invoke('interchain:updateModuleState', {
-				ldem_lisk_chain: { broadhash, height }
-			});
+			this.channel.invoke('app:updateApplicationState', { broadhash, height });
 	    this.logger.debug(
 				{ broadhash, height },
 				'Updating the lisk chain state',
