@@ -58,11 +58,11 @@ const ACTIVE_DELEGATES = 101;
  * @type {module.Chain}
  */
 module.exports = class Chain {
-	constructor(channel, options, migrations = {}) {
+	constructor(channel, options, logger, migrations = {}) {
 		this.channel = channel;
 		this.options = {...options};
 		this.migrations = migrations;
-		this.logger = null;
+		this.logger = logger;
 		this.scope = null;
 		this.slots = null;
 	}
@@ -94,17 +94,12 @@ module.exports = class Chain {
 			'app:getApplicationState',
 		);
 
-		this.logger = createLoggerComponent(loggerConfig);
-		const dbLogger =
-			storageConfig.logFileName &&
-			storageConfig.logFileName === loggerConfig.logFileName
-				? this.logger
-				: createLoggerComponent(
-						Object.assign({
-							...loggerConfig,
-							logFileName: storageConfig.logFileName,
-						}),
-				  );
+		const dbLogger = createLoggerComponent(
+			Object.assign({
+				...loggerConfig,
+				logFileName: storageConfig.logFileName,
+			}),
+		);
 
 		global.constants = this.options.constants;
 		global.exceptions = this.options.exceptions;

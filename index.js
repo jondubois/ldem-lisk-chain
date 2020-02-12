@@ -43,7 +43,11 @@ const MODULE_ALIAS = 'ldem_lisk_chain';
 module.exports = class LDEMLiskModule extends BaseModule {
 	constructor(options) {
 		super({...DefaultConfig.default, ...options});
+		if (!options) {
+			options = {};
+		}
 
+		this.logger = options.logger;
 		this.chain = null;
 	}
 
@@ -167,7 +171,7 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			'6': Object.freeze(InTransferTransaction),
 			'7': Object.freeze(OutTransferTransaction)
 		};
-		this.chain = new Chain(channel, this.options, {
+		this.chain = new Chain(channel, this.options, this.logger, {
 			[MODULE_ALIAS]: migrations
 		});
 		await this.chain.bootstrap();
