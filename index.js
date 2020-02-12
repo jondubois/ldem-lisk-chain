@@ -31,6 +31,7 @@ const {
 } = require('./extra_transactions');
 const BaseModule = require('lisk-framework/src/modules/base_module');
 const MODULE_ALIAS = 'ldem_lisk_chain';
+const pkg = require('./package.json');
 
 /* eslint-disable class-methods-use-this */
 
@@ -62,7 +63,7 @@ module.exports = class LDEMLiskModule extends BaseModule {
 	static get info() {
 		return {
 			author: 'Jonathan Gros-Dubois',
-			version: '1.0.4',
+			version: pkg.version,
 			name: MODULE_ALIAS,
 		};
 	}
