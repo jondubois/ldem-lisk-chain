@@ -219,11 +219,11 @@ module.exports = class Chain {
 	get actions() {
 		return {
 			calculateSupply: action =>
-				this.blocks.blockReward.calculateSupply(action.params.height),
+				this.blocks.blockReward.calculateSupply(action.params.height).toString(),
 			calculateMilestone: action =>
 				this.blocks.blockReward.calculateMilestone(action.params.height),
 			calculateReward: action =>
-				this.blocks.blockReward.calculateReward(action.params.height),
+				this.blocks.blockReward.calculateReward(action.params.height).toString(),
 			generateDelegateList: async action =>
 				this.rounds.generateDelegateList(
 					action.params.round,
