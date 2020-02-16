@@ -173,7 +173,7 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			'7': Object.freeze(OutTransferTransaction)
 		};
 		this.chain = new Chain(channel, this.options, this.logger, {
-			[MODULE_ALIAS]: migrations
+			chain: migrations
 		});
 		await this.chain.bootstrap();
 		channel.publish('chain:bootstrap');
