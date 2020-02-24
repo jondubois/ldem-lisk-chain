@@ -268,7 +268,68 @@ module.exports = class Chain {
 				this.transport.blocksCommon(action.params || {}),
 			getModuleOptions: async action =>
 				this.options,
-	    getLastBlock: async () => this.blocks.lastBlock,
+			getLastBlock: async () => this.blocks.lastBlock,
+			getMultisigWalletMembers: async action => {
+				return this.storage.adapter.db.query(
+					'select mem_accounts2multisignatures."dependentId" from mem_accounts2multisignatures where mem_accounts2multisignatures."accountId" = $1',
+					[action.params.walletAddress]
+				);
+			},
+			getMinMultisigRequiredSignatures: async action => {
+				let multisigMemberMinSigRows = await this.storage.adapter.db.query(
+					'select multimin from mem_accounts where address = $1 limit 1',
+					[action.params.walletAddress]
+				);
+				if (multisigMemberMinSigRows.length <= 0) {
+					throw new Error(
+						`Could not find min signature requirement for multisig wallet address ${action.params.walletAddress}`
+					);
+				}
+				return Number(multisigMemberMinSigRows[0].multimin);
+			},
+			getInboundTransactions: async action => {
+				return this.storage.adapter.db.query(
+					'select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."transferData", trs.signatures from trs where trs."blockId" = $1 and trs."recipientId" = $2',
+					[action.params.blockId, action.params.walletAddress]
+				);
+			},
+			getOutboundTransactions: async action => {
+				return this.storage.adapter.db.query(
+					'select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs."timestamp", trs."recipientId", trs."amount", trs."transferData", trs.signatures from trs where trs."blockId" = $1 and trs."senderId" = $2',
+					[action.params.blockId, action.params.walletAddress]
+				);
+			},
+			getLastBlockAtTimestamp: async action => {
+				return (
+					await this.storage.adapter.db.query(
+						'select blocks.id, blocks.height, blocks."numberOfTransactions", blocks.timestamp from blocks where blocks.timestamp <= $1 order by blocks.timestamp desc limit 1',
+						[action.params.timestamp]
+					)
+				)[0];
+			},
+			getMaxBlockHeight: async () => {
+				let maxHeightRows = await this.storage.adapter.db.query('select max(height) as height from blocks');
+				if (maxHeightRows.length <= 0) {
+					throw new Error(
+						'Could not find max block height'
+					);
+				}
+				return Number(maxHeightRows[0].height);
+			},
+			getBlocksBetweenHeights: async action => {
+				return this.storage.adapter.db.query(
+					'select blocks.id, blocks.height, blocks."numberOfTransactions", blocks.timestamp from blocks where height > $1 and height <= $2 order by blocks.timestamp asc limit $3',
+					[action.params.fromHeight, action.params.toHeight, action.params.limit]
+				);
+			},
+			getBlockAtHeight: async action => {
+				return (
+					await this.storage.adapter.db.query(
+						'select blocks.id, blocks."numberOfTransactions", blocks.timestamp, blocks.height from blocks where height = $1 limit 1',
+						[action.params.height]
+					)
+				)[0];
+			},
 		};
 	}
 

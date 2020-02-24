@@ -155,8 +155,32 @@ module.exports = class LDEMLiskModule extends BaseModule {
 				handler: async action => this.chain.actions.blocksCommon(action),
 				isPublic: true,
 			},
+			getMultisigWalletMembers: {
+				handler: async action => this.chain.actions.getMultisigWalletMembers(action),
+			},
+			getMinMultisigRequiredSignatures: {
+				handler: async action => this.chain.actions.getMinMultisigRequiredSignatures(action),
+			},
+			getInboundTransactions: {
+				handler: async action => this.chain.actions.getInboundTransactions(action),
+			},
+			getOutboundTransactions: {
+				handler: async action => this.chain.actions.getOutboundTransactions(action),
+			},
+			getLastBlockAtTimestamp: {
+				handler: async action => this.chain.actions.getLastBlockAtTimestamp(action),
+			},
+			getMaxBlockHeight: {
+				handler: async action => this.chain.actions.getMaxBlockHeight(action),
+			},
+			getBlocksBetweenHeights: {
+				handler: async action => this.chain.actions.getBlocksBetweenHeights(action),
+			},
+			getBlockAtHeight: {
+				handler: async action => this.chain.actions.getBlockAtHeight(action),
+			},
 			getModuleOptions: {
-				handler: async action => this.chain.actions.getModuleOptions(action)
+				handler: async action => this.chain.actions.getModuleOptions(action),
 			}
 		};
 	}
