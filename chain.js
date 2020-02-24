@@ -288,16 +288,30 @@ module.exports = class Chain {
 				return Number(multisigMemberMinSigRows[0].multimin);
 			},
 			getInboundTransactions: async action => {
-				return this.storage.adapter.db.query(
+				let transactions = await this.storage.adapter.db.query(
 					'select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."transferData", trs.signatures from trs where trs."blockId" = $1 and trs."recipientId" = $2',
 					[action.params.blockId, action.params.walletAddress]
 				);
+				transactions.forEach(txn => {
+					txn.message = txn.transferData.toString('utf8');
+					txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					delete txn.transferData;
+				});
+
+				return transactions;
 			},
 			getOutboundTransactions: async action => {
-				return this.storage.adapter.db.query(
+				let transactions = await this.storage.adapter.db.query(
 					'select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs."timestamp", trs."recipientId", trs."amount", trs."transferData", trs.signatures from trs where trs."blockId" = $1 and trs."senderId" = $2',
 					[action.params.blockId, action.params.walletAddress]
 				);
+				transactions.forEach(txn => {
+					txn.message = txn.transferData.toString('utf8');
+					txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					delete txn.transferData;
+				});
+
+				return transactions;
 			},
 			getLastBlockAtTimestamp: async action => {
 				return (
