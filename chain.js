@@ -293,8 +293,12 @@ module.exports = class Chain {
 					[action.params.blockId, action.params.walletAddress]
 				);
 				transactions.forEach(txn => {
-					txn.message = txn.transferData.toString('utf8');
-					txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					if (txn.transferData) {
+						txn.message = txn.transferData.toString('utf8');
+					}
+					if (txn.senderPublicKey) {
+						txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					}
 					delete txn.transferData;
 				});
 
@@ -306,8 +310,12 @@ module.exports = class Chain {
 					[action.params.blockId, action.params.walletAddress]
 				);
 				transactions.forEach(txn => {
-					txn.message = txn.transferData.toString('utf8');
-					txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					if (txn.transferData) {
+						txn.message = txn.transferData.toString('utf8');
+					}
+					if (txn.senderPublicKey) {
+						txn.senderPublicKey = txn.senderPublicKey.toString('hex');
+					}
 					delete txn.transferData;
 				});
 
