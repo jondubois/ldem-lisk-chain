@@ -167,6 +167,12 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			getOutboundTransactions: {
 				handler: async action => this.chain.actions.getOutboundTransactions(action),
 			},
+			getInboundTransactionsFromBlock: {
+				handler: async action => this.chain.actions.getInboundTransactionsFromBlock(action),
+			},
+			getOutboundTransactionsFromBlock: {
+				handler: async action => this.chain.actions.getOutboundTransactionsFromBlock(action),
+			},
 			getLastBlockAtTimestamp: {
 				handler: async action => this.chain.actions.getLastBlockAtTimestamp(action),
 			},
