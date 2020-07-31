@@ -61,8 +61,6 @@ const modulesToInstrument = {
 		callbackMethods: [
 			'shared.blocksCommon',
 			'shared.blocks',
-			'shared.postSignature',
-			'shared.getSignatures',
 			'shared.getTransactions',
 			'shared.postTransaction',
 		],

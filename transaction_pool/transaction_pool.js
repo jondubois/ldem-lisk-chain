@@ -26,7 +26,6 @@ const { sortBy } = require('./sort');
 const transactionsModule = require('../transactions');
 
 const EVENT_UNCONFIRMED_TRANSACTION = 'EVENT_UNCONFIRMED_TRANSACTION';
-const EVENT_MULTISIGNATURE_SIGNATURE = 'EVENT_MULTISIGNATURE_SIGNATURE';
 
 const receivedQueue = 'received';
 // TODO: Need to decide which queue will include transactions in the validated queue
@@ -196,40 +195,6 @@ class TransactionPool extends EventEmitter {
 				.join(' ');
 			this.logger.info(`Transaction pool - ${queueSizes}`);
 		});
-	}
-
-	async getTransactionAndProcessSignature(signature) {
-		if (!signature) {
-			const message = 'Unable to process signature, signature not provided';
-			this.logger.error(message);
-			throw [new TransactionError(message, '', '.signature')];
-		}
-		// Grab transaction with corresponding ID from transaction pool
-		const transaction = this.getMultisignatureTransaction(
-			signature.transactionId,
-		);
-
-		if (!transaction) {
-			const message =
-				'Unable to process signature, corresponding transaction not found';
-			this.logger.error(message, { signature });
-			throw [new TransactionError(message, '', '.signature')];
-		}
-
-		const transactionResponse = await transactionsModule.processSignature(
-			this.storage,
-		)(transaction, signature);
-		if (
-			transactionResponse.status === TransactionStatus.FAIL &&
-			transactionResponse.errors.length > 0
-		) {
-			const { message } = transactionResponse.errors[0];
-			this.logger.error(message, { signature });
-			throw transactionResponse.errors;
-		}
-
-		this.emit(EVENT_MULTISIGNATURE_SIGNATURE, signature);
-		return transactionResponse;
 	}
 
 	transactionInPool(id) {
@@ -517,5 +482,4 @@ class TransactionPool extends EventEmitter {
 module.exports = {
 	TransactionPool,
 	EVENT_UNCONFIRMED_TRANSACTION,
-	EVENT_MULTISIGNATURE_SIGNATURE,
 };

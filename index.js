@@ -109,9 +109,6 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			updateForgingStatus: {
 				handler: async action => this.chain.actions.updateForgingStatus(action),
 			},
-			postSignature: {
-				handler: async action => this.chain.actions.postSignature(action),
-			},
 			getForgingStatusForAllDelegates: {
 				handler: async () =>
 					this.chain.actions.getForgingStatusForAllDelegates(),
@@ -122,10 +119,6 @@ module.exports = class LDEMLiskModule extends BaseModule {
 			},
 			getTransactions: {
 				handler: async () => this.chain.actions.getTransactions(),
-				isPublic: true,
-			},
-			getSignatures: {
-				handler: async () => this.chain.actions.getSignatures(),
 				isPublic: true,
 			},
 			postTransaction: {

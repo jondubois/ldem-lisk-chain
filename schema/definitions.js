@@ -71,27 +71,6 @@ module.exports = {
 			},
 		},
 	},
-	WSSignaturesList: {
-		id: 'WSSignaturesList',
-		type: 'object',
-		required: ['signatures'],
-		properties: {
-			nonce: {
-				type: 'string',
-				example: 'sYHEDBKcScaAAAYg',
-				minLength: 16,
-				maxLength: 16,
-			},
-			signatures: {
-				type: 'array',
-				items: {
-					type: 'object',
-				},
-				minItems: 1,
-				maxItems: 25,
-			},
-		},
-	},
 	WSBlocksList: {
 		id: 'WSBlocksList',
 		type: 'array',
@@ -137,20 +116,6 @@ module.exports = {
 		required: ['transactions'],
 		properties: {
 			transactions: {
-				type: 'array',
-				uniqueItems: true,
-				maxItems: 100,
-				items: {
-					type: 'object',
-				},
-			},
-		},
-	},
-	WSSignaturesResponse: {
-		id: 'WSSignaturesResponse',
-		required: ['signatures'],
-		properties: {
-			signatures: {
 				type: 'array',
 				uniqueItems: true,
 				maxItems: 100,

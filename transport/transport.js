@@ -93,32 +93,6 @@ class Transport {
 	}
 
 	/**
-	 * Calls enqueue signatures and emits a 'signature/change' socket message.
-	 *
-	 * @param {signature} signature
-	 * @param {Object} broadcast
-	 * @emits signature/change
-	 * @todo Add description for the params
-	 */
-	// eslint-disable-next-line class-methods-use-this
-	onSignature(signature, broadcast) {
-		if (broadcast) {
-			// TODO: Remove the relays property as part of the next hard fork. This needs to be set for backwards compatibility.
-			incrementRelays(signature);
-			this.broadcaster.enqueue(
-				{},
-				{
-					api: 'postSignatures',
-					data: {
-						signature,
-					},
-				},
-			);
-			this.channel.publish('chain:signature:change', signature);
-		}
-	}
-
-	/**
 	 * Calls enqueue transactions and emits a 'transactions/change' socket message.
 	 *
 	 * @param {transaction} transaction
@@ -205,8 +179,6 @@ class Transport {
 	 * @property {function} list
 	 * @property {function} height
 	 * @property {function} status
-	 * @property {function} postSignatures
-	 * @property {function} getSignatures
 	 * @property {function} getTransactions
 	 * @property {function} postTransactions
 	 * @todo Add description for the functions
@@ -383,92 +355,6 @@ class Transport {
 	}
 
 	/**
-	 * Description of postSignature.
-	 *
-	 * @todo Add @param tags
-	 * @todo Add @returns tag
-	 * @todo Add description of the function
-	 */
-	async postSignature(query) {
-		const errors = validator.validate(definitions.Signature, query.signature);
-
-		if (errors.length) {
-			const error = new TransactionError(errors[0].message);
-			return {
-				success: false,
-				code: 400,
-				errors: [error],
-			};
-		}
-
-		try {
-			await this.transactionPoolModule.getTransactionAndProcessSignature(
-				query.signature,
-			);
-			return { success: true };
-		} catch (err) {
-			return {
-				success: false,
-				code: 409,
-				errors: err,
-			};
-		}
-	}
-
-	/**
-	 * Description of postSignatures.
-	 *
-	 * @todo Add @param tags
-	 * @todo Add @returns tag
-	 * @todo Add description of the function
-	 */
-	async postSignatures(query) {
-		if (!this.constants.broadcasts.active) {
-			return this.logger.debug(
-				'Receiving signatures disabled by user through config.json',
-			);
-		}
-
-		const errors = validator.validate(definitions.WSSignaturesList, query);
-
-		if (errors.length) {
-			this.logger.debug('Invalid signatures body', errors);
-			// TODO: If there is an error, invoke the applyPenalty action on the Network module once it is implemented.
-			throw errors;
-		}
-
-		return this._receiveSignatures(query.signatures);
-	}
-
-	/**
-	 * Description of getSignatures.
-	 *
-	 * @todo Add @param tags
-	 * @todo Add @returns tag
-	 * @todo Add description of the function
-	 */
-	async getSignatures() {
-		const transactions = this.transactionPoolModule.getMultisignatureTransactionList(
-			true,
-			this.constants.maxSharedTransactions,
-		);
-
-		const signatures = transactions
-			.filter(
-				transaction => transaction.signatures && transaction.signatures.length,
-			)
-			.map(transaction => ({
-				transaction: transaction.id,
-				signatures: transaction.signatures,
-			}));
-
-		return {
-			success: true,
-			signatures,
-		};
-	}
-
-	/**
 	 * Description of getTransactions.
 	 *
 	 * @todo Add @param tags
@@ -533,47 +419,6 @@ class Transport {
 		}
 
 		return this._receiveTransactions(query.transactions);
-	}
-
-	/**
-	 * Validates signatures body and for each signature calls receiveSignature.
-	 *
-	 * @private
-	 * @implements {__private.receiveSignature}
-	 * @param {Array} signatures - Array of signatures
-	 */
-	async _receiveSignatures(signatures = []) {
-		// eslint-disable-next-line no-restricted-syntax
-		for (const signature of signatures) {
-			try {
-				// eslint-disable-next-line no-await-in-loop
-				await this._receiveSignature(signature);
-			} catch (err) {
-				this.logger.debug(err, signature);
-			}
-		}
-	}
-
-	/**
-	 * Validates signature with schema and calls getTransactionAndProcessSignature.
-	 *
-	 * @private
-	 * @param {Object} query
-	 * @param {string} query.signature
-	 * @param {Object} query.transaction
-	 * @returns {Promise.<boolean, Error>}
-	 * @todo Add description for the params
-	 */
-	async _receiveSignature(signature) {
-		const errors = validator.validate(definitions.Signature, signature);
-
-		if (errors.length) {
-			throw errors;
-		}
-
-		return this.transactionPoolModule.getTransactionAndProcessSignature(
-			signature,
-		);
 	}
 
 	/**

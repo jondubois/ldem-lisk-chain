@@ -51,11 +51,6 @@ class Broadcaster {
 				collection: 'transactions',
 				object: 'transaction',
 			},
-			{
-				path: 'postSignatures',
-				collection: 'signatures',
-				object: 'signature',
-			},
 		];
 
 		if (this.config.active) {
