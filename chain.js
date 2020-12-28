@@ -19,6 +19,8 @@ if (process.env.NEW_RELIC_LICENSE_KEY) {
 	require('./utils/newrelic_lisk');
 }
 
+const liskCryptography = require('@liskhq/lisk-cryptography');
+const liskTransactions = require('@liskhq/lisk-transactions');
 const { convertErrorsToString } = require('./utils/error_handlers');
 const { Sequence } = require('./utils/sequence');
 const { createStorageComponent } = require('lisk-framework/src/components/storage');
@@ -169,9 +171,9 @@ module.exports = class Chain {
 			}
 			this._subscribeToEvents();
 
-	    this._startLoader();
-	    this._calculateConsensus();
-	    await this._startForging();
+			this._startLoader();
+			this._calculateConsensus();
+			await this._startForging();
 
 			// Avoid receiving blocks/transactions from the network during snapshotting process
 			if (!this.options.loading.rebuildUpToRound) {
@@ -260,10 +262,8 @@ module.exports = class Chain {
 				this.options,
 			getLastBlock: async () => this.blocks.lastBlock,
 			getMultisigWalletMembers: async action => {
-				return this.storage.adapter.db.query(
-					'select mem_accounts2multisignatures."dependentId" from mem_accounts2multisignatures where mem_accounts2multisignatures."accountId" = $1',
-					[action.params.walletAddress]
-				);
+				let multisigMembers = await this._getMultisigWalletMembers(action.params.walletAddress);
+				return multisigMembers.map(member => liskCryptography.getAddressFromPublicKey(member.dependentId));
 			},
 			getMinMultisigRequiredSignatures: async action => {
 				let multisigMemberMinSigRows = await this.storage.adapter.db.query(
@@ -278,46 +278,38 @@ module.exports = class Chain {
 				return Number(multisigMemberMinSigRows[0].multimin);
 			},
 			getInboundTransactions: async action => {
-				let { fromTimestamp, limit } = action.params;
+				let { walletAddress, fromTimestamp, limit } = action.params;
 				let timestampClause = fromTimestamp == null ? '' : ' and trs.timestamp >= $2';
 				let limitClause = limit == null ? '' : ' limit $3';
 				let transactions = await this.storage.adapter.db.query(
 					`select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."blockId", trs."transferData", trs.signatures from trs where trs."recipientId" = $1${timestampClause} order by trs.timestamp desc${limitClause}`,
-					[action.params.walletAddress, fromTimestamp, limit]
+					[walletAddress, fromTimestamp, limit]
 				);
-				this._sanitizeTransactions(transactions);
-
-				return transactions;
+				return this._sanitizeTransactions(transactions);
 			},
 			getOutboundTransactions: async action => {
-				let { fromTimestamp, limit } = action.params;
+				let { walletAddress, fromTimestamp, limit } = action.params;
 				let timestampClause = fromTimestamp == null ? '' : ' and trs.timestamp >= $2';
 				let limitClause = limit == null ? '' : ' limit $3';
 				let transactions = await this.storage.adapter.db.query(
 					`select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."blockId", trs."transferData", trs.signatures from trs where trs."senderId" = $1${timestampClause} order by trs.timestamp desc${limitClause}`,
-					[action.params.walletAddress, fromTimestamp, limit]
+					[walletAddress, fromTimestamp, limit]
 				);
-				this._sanitizeTransactions(transactions);
-
-				return transactions;
+				return this._sanitizeTransactions(transactions);
 			},
 			getInboundTransactionsFromBlock: async action => {
 				let transactions = await this.storage.adapter.db.query(
 					`select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."blockId", trs."transferData", trs.signatures from trs where trs."recipientId" = $1 and trs."blockId" = $2`,
 					[action.params.walletAddress, action.params.blockId]
 				);
-				this._sanitizeTransactions(transactions);
-
-				return transactions;
+				return this._sanitizeTransactions(transactions);
 			},
 			getOutboundTransactionsFromBlock: async action => {
 				let transactions = await this.storage.adapter.db.query(
 					`select trs.id, trs.type, trs."senderId", trs."senderPublicKey", trs.timestamp, trs."recipientId", trs.amount, trs."blockId", trs."transferData", trs.signatures from trs where trs."senderId" = $1 and trs."blockId" = $2`,
 					[action.params.walletAddress, action.params.blockId]
 				);
-				this._sanitizeTransactions(transactions);
-
-				return transactions;
+				return this._sanitizeTransactions(transactions);
 			},
 			getLastBlockAtTimestamp: async action => {
 				return (
@@ -353,16 +345,69 @@ module.exports = class Chain {
 		};
 	}
 
-	_sanitizeTransactions(transactions) {
-		transactions.forEach(txn => {
-			if (txn.transferData) {
-				txn.message = txn.transferData.toString('utf8');
-			}
-			if (txn.senderPublicKey) {
-				txn.senderPublicKey = txn.senderPublicKey.toString('hex');
-			}
-			delete txn.transferData;
+	async _getMultisigWalletMembers(walletAddress) {
+		return this.storage.adapter.db.query(
+			'select mem_accounts2multisignatures."dependentId" from mem_accounts2multisignatures where mem_accounts2multisignatures."accountId" = $1',
+			[walletAddress]
+		);
+	}
+
+	async _getMultisigMemberWalletAddress(transaction, signature) {
+		let { senderId } = transaction;
+		let multisigMemberList = await this._getMultisigWalletMembers(senderId);
+		let memberPublicKeyList = multisigMemberList.map(member => member.dependentId);
+
+		let { signature: txnSignature, signSignature, signatures, ...transactionToHash } = transaction;
+		if (!transactionToHash.asset) {
+			transactionToHash.asset = {};
+		}
+		if (transactionToHash.transferData) {
+			transactionToHash.asset.data = transactionToHash.transferData.toString('utf8');
+		}
+		transactionToHash.senderPublicKey = transactionToHash.senderPublicKey.toString('hex');
+		let memberPublicKey = memberPublicKeyList.find((publicKey) => {
+			let txnHash = liskCryptography.hash(liskTransactions.utils.getTransactionBytes(transactionToHash));
+			return liskCryptography.verifyData(txnHash, signature, publicKey);
 		});
+		if (!memberPublicKey) {
+			return null;
+		}
+		return liskCryptography.getAddressFromPublicKey(memberPublicKey);
+	}
+
+	async _sanitizeTransactions(transactions) {
+		return Promise.all(
+			transactions.map(async (txn) => {
+				let newTxn = {
+					...txn
+				};
+				if (txn.transferData) {
+					newTxn.message = txn.transferData.toString('utf8');
+					delete newTxn.transferData;
+				}
+				if (txn.senderPublicKey) {
+					newTxn.senderPublicKey = txn.senderPublicKey.toString('hex');
+				}
+				if (txn.recipientId) {
+					newTxn.recipientAddress = txn.recipientId;
+					delete newTxn.recipientId;
+				}
+				newTxn.senderAddress = txn.senderId;
+				delete newTxn.senderId;
+				if (txn.type === 0 && txn.signatures) {
+					let signatureList = txn.signatures.split(',');
+					newTxn.signatures = await Promise.all(
+						signatureList.map(async (signature) => {
+							return {
+								signerAddress: await this._getMultisigMemberWalletAddress(txn, signature),
+								signature
+							};
+						})
+					);
+				}
+				return newTxn;
+			})
+		);
 	}
 
 	async cleanup(error) {
@@ -648,7 +693,7 @@ module.exports = class Chain {
 
 		this.blocks.on(EVENT_NEW_BROADHASH, ({ broadhash, height }) => {
 			this.channel.invoke('app:updateApplicationState', { broadhash, height });
-	    this.logger.debug(
+			this.logger.debug(
 				{ broadhash, height },
 				'Updating the lisk chain state',
 			);

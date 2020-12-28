@@ -382,7 +382,16 @@ class Transport {
 	 */
 	async postTransaction(query) {
 		try {
-			const id = await this._receiveTransaction(query.transaction);
+			let { transaction } = query;
+			let sanitizedTransaction = {
+				...transaction
+			};
+			if (transaction.signatures) {
+				sanitizedTransaction.signatures = transaction.signatures.map(
+					signaturePacket => signaturePacket.signature
+				);
+			}
+			const id = await this._receiveTransaction(sanitizedTransaction);
 			return {
 				success: true,
 				transactionId: id,
