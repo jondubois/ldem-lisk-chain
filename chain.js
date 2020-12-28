@@ -352,11 +352,7 @@ module.exports = class Chain {
 		);
 	}
 
-	async _getMultisigMemberWalletAddress(transaction, signature) {
-		let { senderId } = transaction;
-		let multisigMemberList = await this._getMultisigWalletMembers(senderId);
-		let memberPublicKeyList = multisigMemberList.map(member => member.dependentId);
-
+	_findMultisigMemberWalletAddress(transaction, signature, memberPublicKeyList) {
 		let { signature: txnSignature, signSignature, signatures, ...transactionToHash } = transaction;
 		if (!transactionToHash.asset) {
 			transactionToHash.asset = {};
@@ -396,14 +392,17 @@ module.exports = class Chain {
 				delete newTxn.senderId;
 				if (txn.type === 0 && txn.signatures) {
 					let signatureList = txn.signatures.split(',');
-					newTxn.signatures = await Promise.all(
-						signatureList.map(async (signature) => {
+					if (signatureList.length) {
+						let { senderId } = txn;
+						let multisigMemberList = await this._getMultisigWalletMembers(senderId);
+						let memberPublicKeyList = multisigMemberList.map(member => member.dependentId);
+						newTxn.signatures = signatureList.map((signature) => {
 							return {
-								signerAddress: await this._getMultisigMemberWalletAddress(txn, signature),
+								signerAddress: this._findMultisigMemberWalletAddress(txn, signature, memberPublicKeyList),
 								signature
 							};
-						})
-					);
+						});
+					}
 				}
 				return newTxn;
 			})
