@@ -396,12 +396,12 @@ class Transport {
 				success: true,
 				transactionId: id,
 			};
-		} catch (err) {
-			return {
-				success: false,
-				message: err.message || 'Transaction was rejected with errors',
-				errors: err,
-			};
+		} catch (errors) {
+			// To make error format compatible with lisk-dex.
+			let err = new Error(convertErrorsToString(errors));
+			err.name = 'InvalidTransactionError';
+			err.type = 'InvalidActionError';
+			throw err;
 		}
 	}
 
